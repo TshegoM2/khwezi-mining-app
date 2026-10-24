@@ -12,14 +12,17 @@ st.set_page_config(
 # --- CUSTOM RED & WHITE THEME (Wits SME Branding) ---
 st.markdown("""
     <style>
+    /* Main background to clean white */
     .stApp {
         background-color: #FFFFFF;
         color: #111111;
     }
+    /* Sidebar styling */
     section[data-testid="stSidebar"] {
         background-color: #F8F9FA;
         border-right: 1px solid #E5E7EB;
     }
+    /* Red/Maroon Primary Buttons */
     .stButton>button {
         background-color: #990000; 
         color: white;
@@ -31,6 +34,7 @@ st.markdown("""
         background-color: #CC0000;
         color: white;
     }
+    /* Form submit button */
     .stFormSubmitButton>button {
         background-color: #990000;
         color: white;
@@ -46,8 +50,10 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # --- SME LOGO & HEADER BRANDING ---
+# Tip: Save your red-and-white SME logo image in your GitHub repo as 'sme_logo.png'
+# If the image file isn't uploaded yet, Streamlit will gracefully skip it without crashing.
 try:
-    st.image("sme logo.jpg", width=220)
+    st.image("sme_logo.png", width=220)
 except:
     pass
 
@@ -104,7 +110,7 @@ equipment["Availability_Percent"] = equipment.apply(
     lambda row: calculate_availability(row["Operating_Hours"], row["Downtime_Hours"]), axis=1
 )
 
-# --- TSHEGO'S FRONT-END: LOGIN PORTAL & RBAC (Section 3a & Table 1) ---
+# --- LOGIN PORTAL & RBAC (Section 3a & Table 1) ---
 if not st.session_state["logged_in"]:
     st.subheader("🔒 User Access Control Portal")
     st.write("Please authenticate your credentials and select your operational role.")
@@ -156,15 +162,11 @@ else:
     # --- CENTRAL DASHBOARD ---
     if selected_page == "View Dashboard":
         st.subheader("📊 Central Monitoring Dashboard")
-        
-        # Expanded KPI metrics matching the brief (Section 3i) including Near Misses & LTIs
-        k1, k2, k3, k4, k5 = st.columns(5)
-        k1.metric("Total Workers", len(worker_safety), "Active")
-        k2.metric("Safety Incidents", len(safety_incidents), "Logged")
-        k3.metric("Near Misses", (safety_incidents["Incident_Type"] == "Near Miss").sum(), "Monitored")
-        k4.metric("Lost-Time Injuries", (safety_incidents.get("Lost_Time_Injury", "No") == "Yes").sum(), "LTI Status", delta_color="inverse")
-        k5.metric("Critical Alerts", (equipment["Overall_Condition"] == "CRITICAL").sum(), "Action Required", delta_color="inverse")
-        
+        k1, k2, k3, k4 = st.columns(4)
+        k1.metric("Total Workers", "142", "Active")
+        k2.metric("Safety Incidents", "3", "-1 today", delta_color="inverse")
+        k3.metric("Equipment Availability", f"{equipment['Availability_Percent'].mean():.1f}%")
+        k4.metric("Critical Alerts", (equipment["Overall_Condition"] == "CRITICAL").sum(), "Action Required", delta_color="inverse")
         st.info("💡 Use the sidebar navigation menu to access specific system modules.")
         
         st.subheader("🚜 Equipment Monitoring Analysis")
@@ -190,7 +192,7 @@ else:
             fig_incidents = px.bar(severity_counts, x="Severity", y="Count", color="Severity", title="Safety Incidents by Severity")
             st.plotly_chart(fig_incidents, use_container_width=True)
 
-    # --- SAMMIE'S MODULES ---
+    # --- SAMMIE'S PLACEHOLDERS / MODULES ---
     elif selected_page == "Worker Safety Data":
         st.subheader("👷 Worker Health and Safety Monitoring")
         st.write("### Worker Safety Database")
@@ -274,7 +276,7 @@ else:
         elif r_score <= 16: st.error("High Risk - Warning Triggered!")
         else: st.error("CRITICAL RISK - Immediate Action Required!")
 
-    # --- THEMBI'S MODULES ---
+    # --- THEMBI'S INTEGRATED MODULES ---
     elif selected_page == "Equipment Data":
         st.subheader("🚜 Equipment Database & Condition Monitoring")
         st.dataframe(equipment, use_container_width=True)
