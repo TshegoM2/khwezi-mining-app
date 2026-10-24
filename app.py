@@ -9,21 +9,63 @@ st.set_page_config(
     layout="wide"
 )
 
+# --- CUSTOM RED & WHITE THEME (Wits SME Branding) ---
+st.markdown("""
+    <style>
+    .stApp {
+        background-color: #FFFFFF;
+        color: #111111;
+    }
+    section[data-testid="stSidebar"] {
+        background-color: #F8F9FA;
+        border-right: 1px solid #E5E7EB;
+    }
+    .stButton>button {
+        background-color: #990000; 
+        color: white;
+        border-radius: 4px;
+        font-weight: bold;
+        border: none;
+    }
+    .stButton>button:hover {
+        background-color: #CC0000;
+        color: white;
+    }
+    .stFormSubmitButton>button {
+        background-color: #990000;
+        color: white;
+        font-weight: bold;
+        border-radius: 4px;
+        width: 100%;
+    }
+    .stFormSubmitButton>button:hover {
+        background-color: #CC0000;
+        color: white;
+    }
+    </style>
+""", unsafe_allow_html=True)
+
+# --- SME LOGO & HEADER BRANDING ---
+try:
+    st.image("sme logo.jpg", width=220)
+except:
+    pass
+
+st.title("⛏️ Khwezi Mining Health, Safety & Equipment Monitoring Application")
+st.markdown("**School of Mining Engineering | University of the Witwatersrand**")
+st.markdown("*A centralized digital monitoring platform for operational decision-making.*")
+st.divider()
+
 if "logged_in" not in st.session_state:
     st.session_state["logged_in"] = False
     st.session_state["username"] = ""
     st.session_state["role"] = ""
 
-st.title("⛏️ Khwezi Mining Health, Safety & Equipment Monitoring Application")
-st.markdown("*A centralized digital monitoring platform for operational decision-making.*")
-st.divider()
 # --- WORKER SAFETY AND INCIDENT DATABASES ---
-
 worker_safety = pd.read_csv("worker_safety.csv")
 safety_incidents = pd.read_csv("safety_incidents.csv")
 
 # --- THEMBI'S BACK-END LOGIC: EQUIPMENT DATABASE & MONITORING ---
-# Using the fallback dataframe so it won't crash if equipment.csv is missing
 equipment = pd.DataFrame({
     "Equipment_ID": ["TRK-001", "TRK-002", "DRL-001"],
     "Equipment_Type": ["Haul Truck", "Haul Truck", "Drill"],
@@ -88,7 +130,7 @@ else:
     user = st.session_state["username"]
     role = st.session_state["role"]
     
-    # --- TSHEGO'S SIDEBAR NAVIGATION & TABLE 1 PERMISSIONS ---
+    # --- SIDEBAR NAVIGATION & TABLE 1 PERMISSIONS ---
     st.sidebar.title("Navigation Menu")
     st.sidebar.write(f"**User:** {user}")
     st.sidebar.write(f"**Role:** {role}")
@@ -114,15 +156,18 @@ else:
     # --- CENTRAL DASHBOARD ---
     if selected_page == "View Dashboard":
         st.subheader("📊 Central Monitoring Dashboard")
-        k1, k2, k3, k4 = st.columns(4)
-        k1.metric("Total Workers", "142", "Active")
-        k2.metric("Safety Incidents", "3", "-1 today", delta_color="inverse")
-        k3.metric("Equipment Availability", f"{equipment['Availability_Percent'].mean():.1f}%")
-        k4.metric("Critical Alerts", (equipment["Overall_Condition"] == "CRITICAL").sum(), "Action Required", delta_color="inverse")
+        
+        # Expanded KPI metrics matching the brief (Section 3i) including Near Misses & LTIs
+        k1, k2, k3, k4, k5 = st.columns(5)
+        k1.metric("Total Workers", len(worker_safety), "Active")
+        k2.metric("Safety Incidents", len(safety_incidents), "Logged")
+        k3.metric("Near Misses", (safety_incidents["Incident_Type"] == "Near Miss").sum(), "Monitored")
+        k4.metric("Lost-Time Injuries", (safety_incidents.get("Lost_Time_Injury", "No") == "Yes").sum(), "LTI Status", delta_color="inverse")
+        k5.metric("Critical Alerts", (equipment["Overall_Condition"] == "CRITICAL").sum(), "Action Required", delta_color="inverse")
+        
         st.info("💡 Use the sidebar navigation menu to access specific system modules.")
         
         st.subheader("🚜 Equipment Monitoring Analysis")
-
         fig3 = px.bar(
             equipment,
             x="Equipment_ID",
@@ -130,61 +175,31 @@ else:
             color="Equipment_ID",
             title="Equipment Availability (%)"
         )
-
         st.plotly_chart(fig3, use_container_width=True)
         
-        # --- WORKER SAFETY AND INCIDENT GRAPHS ---
-
         st.subheader("👷 Worker Safety and Incident Analysis")
-
         col1, col2 = st.columns(2)
-
         with col1:
             ppe_counts = worker_safety["PPE_Status"].value_counts().reset_index()
             ppe_counts.columns = ["PPE_Status", "Count"]
-
-            fig_safety = px.pie(
-                ppe_counts,
-                names="PPE_Status",
-                values="Count",
-                title="Worker PPE Compliance"
-            )
-
+            fig_safety = px.pie(ppe_counts, names="PPE_Status", values="Count", title="Worker PPE Compliance")
             st.plotly_chart(fig_safety, use_container_width=True)
-
         with col2:
             severity_counts = safety_incidents["Severity"].value_counts().reset_index()
             severity_counts.columns = ["Severity", "Count"]
-
-            fig_incidents = px.bar(
-                severity_counts,
-                x="Severity",
-                y="Count",
-                color="Severity",
-                title="Safety Incidents by Severity"
-            )
-
+            fig_incidents = px.bar(severity_counts, x="Severity", y="Count", color="Severity", title="Safety Incidents by Severity")
             st.plotly_chart(fig_incidents, use_container_width=True)
 
-
-
-    # --- SAMMIE'S PLACEHOLDERS ---
+    # --- SAMMIE'S MODULES ---
     elif selected_page == "Worker Safety Data":
         st.subheader("👷 Worker Health and Safety Monitoring")
-
         st.write("### Worker Safety Database")
         st.dataframe(worker_safety, use_container_width=True)
 
         total_workers = len(worker_safety)
-        compliant_workers = (
-            worker_safety["Compliance_Status"] == "Compliant"
-        ).sum()
-        action_required = (
-            worker_safety["Compliance_Status"] == "Action Required"
-        ).sum()
-        ppe_non_compliant = (
-            worker_safety["PPE_Status"] == "Non-Compliant"
-        ).sum()
+        compliant_workers = (worker_safety["Compliance_Status"] == "Compliant").sum()
+        action_required = (worker_safety["Compliance_Status"] == "Action Required").sum()
+        ppe_non_compliant = (worker_safety["PPE_Status"] == "Non-Compliant").sum()
 
         c1, c2, c3, c4 = st.columns(4)
         c1.metric("Total Workers", total_workers)
@@ -193,57 +208,31 @@ else:
         c4.metric("PPE Non-Compliant", ppe_non_compliant)
 
         st.write("### Select Worker")
-
-        selected_worker = st.selectbox(
-            "Worker ID",
-            worker_safety["Worker_ID"].tolist()
-        )
-
-        worker = worker_safety[
-            worker_safety["Worker_ID"] == selected_worker
-        ].iloc[0]
+        selected_worker = st.selectbox("Worker ID", worker_safety["Worker_ID"].tolist())
+        worker = worker_safety[worker_safety["Worker_ID"] == selected_worker].iloc[0]
 
         st.write(f"Role: {worker['Role']}")
         st.write(f"Section: {worker['Section']}")
         st.write(f"Shift: {worker['Shift']}")
         st.write(f"PPE Status: {worker['PPE_Status']}")
-        st.write(
-            f"Safety Training: {worker['Safety_Training_Status']}"
-        )
-        st.write(
-            f"Safety Induction: {worker['Safety_Induction_Status']}"
-        )
-        st.write(
-            f"Hazards Reported: {worker['Hazards_Reported']}"
-        )
+        st.write(f"Safety Training: {worker['Safety_Training_Status']}")
+        st.write(f"Safety Induction: {worker['Safety_Induction_Status']}")
+        st.write(f"Hazards Reported: {worker['Hazards_Reported']}")
 
-        if worker["PPE_Status"] == "Non-Compliant":
-            st.error("PPE ALERT: Worker is not PPE compliant.")
-
-        if worker["Safety_Training_Status"] == "Expired":
-            st.warning("TRAINING ALERT: Safety training has expired.")
-
-        if worker["Safety_Induction_Status"] == "Pending":
-            st.warning("INDUCTION ALERT: Safety induction is pending.")
-
-        if worker["Compliance_Status"] == "Action Required":
-            st.error("Overall Safety Status: Action Required")
-        else:
-            st.success("Overall Safety Status: Compliant")
+        if worker["PPE_Status"] == "Non-Compliant": st.error("PPE ALERT: Worker is not PPE compliant.")
+        if worker["Safety_Training_Status"] == "Expired": st.warning("TRAINING ALERT: Safety training has expired.")
+        if worker["Safety_Induction_Status"] == "Pending": st.warning("INDUCTION ALERT: Safety induction is pending.")
+        if worker["Compliance_Status"] == "Action Required": st.error("Overall Safety Status: Action Required")
+        else: st.success("Overall Safety Status: Compliant")
 
     elif selected_page == "Safety Incidents":
         st.subheader("🚨 Safety Incident Database")
-
         st.write("### Recorded Safety Incidents")
         st.dataframe(safety_incidents, use_container_width=True)
 
         total_incidents = len(safety_incidents)
-        critical_incidents = (
-            safety_incidents["Severity"] == "Critical"
-        ).sum()
-        open_incidents = (
-            safety_incidents["Investigation_Status"] != "Closed"
-        ).sum()
+        critical_incidents = (safety_incidents["Severity"] == "Critical").sum()
+        open_incidents = (safety_incidents["Investigation_Status"] != "Closed").sum()
         total_days_lost = safety_incidents["Days_Lost"].sum()
 
         c1, c2, c3, c4 = st.columns(4)
@@ -253,15 +242,8 @@ else:
         c4.metric("Total Days Lost", total_days_lost)
 
         st.write("### Select Incident")
-
-        selected_incident = st.selectbox(
-            "Incident ID",
-            safety_incidents["Incident_ID"].tolist()
-        )
-
-        incident = safety_incidents[
-            safety_incidents["Incident_ID"] == selected_incident
-        ].iloc[0]
+        selected_incident = st.selectbox("Incident ID", safety_incidents["Incident_ID"].tolist())
+        incident = safety_incidents[safety_incidents["Incident_ID"] == selected_incident].iloc[0]
 
         st.write(f"Date: {incident['Incident_Date']}")
         st.write(f"Worker ID: {incident['Worker_ID']}")
@@ -269,35 +251,17 @@ else:
         st.write(f"Incident Type: {incident['Incident_Type']}")
         st.write(f"Severity: {incident['Severity']}")
         st.write(f"Days Lost: {incident['Days_Lost']}")
-        st.write(
-            f"Reported to DMRE: {incident['Reported_To_DMRE']}"
-        )
-        st.write(
-            f"Investigation Status: {incident['Investigation_Status']}"
-        )
-        st.write(
-            f"Corrective Action: {incident['Corrective_Action']}"
-        )
+        st.write(f"Reported to DMRE: {incident['Reported_To_DMRE']}")
+        st.write(f"Investigation Status: {incident['Investigation_Status']}")
+        st.write(f"Corrective Action: {incident['Corrective_Action']}")
 
-        if incident["Severity"] == "Critical":
-            st.error(
-                "CRITICAL INCIDENT: Immediate safety attention required."
-            )
-        elif incident["Severity"] == "High":
-            st.warning(
-                "HIGH SEVERITY: Incident requires priority attention."
-            )
-        elif incident["Severity"] == "Medium":
-            st.warning(
-                "MEDIUM SEVERITY: Review corrective actions."
-            )
-        else:
-            st.info("LOW SEVERITY: Follow standard safety procedures.")
+        if incident["Severity"] == "Critical": st.error("CRITICAL INCIDENT: Immediate safety attention required.")
+        elif incident["Severity"] == "High": st.warning("HIGH SEVERITY: Incident requires priority attention.")
+        elif incident["Severity"] == "Medium": st.warning("MEDIUM SEVERITY: Review corrective actions.")
+        else: st.info("LOW SEVERITY: Follow standard safety procedures.")
 
-        if incident["Investigation_Status"] != "Closed":
-            st.warning("Investigation has not been closed.")
-        else:
-            st.success("Investigation closed.")
+        if incident["Investigation_Status"] != "Closed": st.warning("Investigation has not been closed.")
+        else: st.success("Investigation closed.")
         
     elif selected_page == "Risk Assessment":
         st.subheader("⚠️ Risk Assessment Matrix (Likelihood × Consequence)")
@@ -310,7 +274,7 @@ else:
         elif r_score <= 16: st.error("High Risk - Warning Triggered!")
         else: st.error("CRITICAL RISK - Immediate Action Required!")
 
-    # --- THEMBI'S INTEGRATED MODULES ---
+    # --- THEMBI'S MODULES ---
     elif selected_page == "Equipment Data":
         st.subheader("🚜 Equipment Database & Condition Monitoring")
         st.dataframe(equipment, use_container_width=True)
@@ -326,12 +290,9 @@ else:
         st.write(f"Temperature: {selected['Temperature_C']} °C — {selected['Temperature_Status']}")
         st.write(f"Vibration: {selected['Vibration_mm_s']} mm/s — {selected['Vibration_Status']}")
 
-        if selected["Overall_Condition"] == "CRITICAL":
-            st.error("CRITICAL: Equipment requires immediate attention!")
-        elif selected["Overall_Condition"] == "WARNING":
-            st.warning("WARNING: Equipment condition requires monitoring.")
-        else:
-            st.success("Equipment operating within normal limits.")
+        if selected["Overall_Condition"] == "CRITICAL": st.error("CRITICAL: Equipment requires immediate attention!")
+        elif selected["Overall_Condition"] == "WARNING": st.warning("WARNING: Equipment condition requires monitoring.")
+        else: st.success("Equipment operating within normal limits.")
 
     elif selected_page == "Maintenance Data":
         st.subheader("🔧 Equipment Maintenance Monitoring")
@@ -346,27 +307,22 @@ else:
             availability = item["Availability_Percent"]
             downtime = item["Downtime_Hours"]
 
-            if status in ["Overdue", "Under Maintenance"]:
-                st.error(f"{equipment_id}: Maintenance status is {status}.")
-            elif status == "Due":
-                st.warning(f"{equipment_id}: Maintenance is due.")
-            if availability < 90:
-                st.warning(f"{equipment_id}: Low availability ({availability}%).")
-            if downtime > 100:
-                st.warning(f"{equipment_id}: Excessive downtime ({downtime} hours).")
+            if status in ["Overdue", "Under Maintenance"]: st.error(f"{equipment_id}: Maintenance status is {status}.")
+            elif status == "Due": st.warning(f"{equipment_id}: Maintenance is due.")
+            if availability < 90: st.warning(f"{equipment_id}: Low availability ({availability}%).")
+            if downtime > 100: st.warning(f"{equipment_id}: Excessive downtime ({downtime} hours).")
 
     # --- ADMIN / REPORTS ---
     elif selected_page == "Generate Reports":
         st.subheader("📄 Generate Operational Reports")
-        if st.button("Generate Summary Report"):
-            st.success("Report compiled successfully.")
+        if st.button("Generate Summary Report"): st.success("Report compiled successfully.")
 
     elif selected_page == "Manage Users":
         st.subheader("⚙️ User Management Portal (Administrator Only)")
         st.text_input("New User ID")
         st.button("Grant Access")
         
-# --- LUNGI'S SECTION: DATA ANALYTICS (Appendix A) ---
+    # --- LUNGHI'S SECTION: DATA ANALYTICS (Appendix A) ---
     elif selected_page == "Interactive Data Analysis":
         st.subheader("📈 Interactive Data Analysis & Business Intelligence")
         st.write("Answering key mining engineering questions from Appendix A.")
@@ -401,6 +357,3 @@ else:
                               color_discrete_map={"CRITICAL":"red", "WARNING":"orange", "NORMAL":"green"})
             fig_temp.add_hline(y=100, line_dash="dash", line_color="red", annotation_text="Critical Limit (100°C)")
             st.plotly_chart(fig_temp, use_container_width=True)
-
-            
-       
