@@ -53,7 +53,7 @@ st.markdown("""
 # Tip: Save your red-and-white SME logo image in your GitHub repo as 'sme_logo.png'
 # If the image file isn't uploaded yet, Streamlit will gracefully skip it without crashing.
 try:
-    st.image("sme_logo.png", width=220)
+    st.image("sme logo.jpg", width=220)
 except:
     pass
 
