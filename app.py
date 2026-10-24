@@ -132,6 +132,40 @@ else:
         )
 
         st.plotly_chart(fig3, use_container_width=True)
+        
+        # --- WORKER SAFETY AND INCIDENT GRAPHS ---
+
+        st.subheader("👷 Worker Safety and Incident Analysis")
+
+        col1, col2 = st.columns(2)
+
+        with col1:
+            ppe_counts = worker_safety["PPE_Status"].value_counts().reset_index()
+            ppe_counts.columns = ["PPE_Status", "Count"]
+
+            fig_safety = px.pie(
+                ppe_counts,
+                names="PPE_Status",
+                values="Count",
+                title="Worker PPE Compliance"
+            )
+
+            st.plotly_chart(fig_safety, use_container_width=True)
+
+        with col2:
+            severity_counts = safety_incidents["Severity"].value_counts().reset_index()
+            severity_counts.columns = ["Severity", "Count"]
+
+            fig_incidents = px.bar(
+                severity_counts,
+                x="Severity",
+                y="Count",
+                color="Severity",
+                title="Safety Incidents by Severity"
+            )
+
+            st.plotly_chart(fig_incidents, use_container_width=True)
+
 
 
     # --- SAMMIE'S PLACEHOLDERS ---
