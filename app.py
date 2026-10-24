@@ -9,46 +9,65 @@ st.set_page_config(
     layout="wide"
 )
 
-# --- CUSTOM RED & INDUSTRIAL LIGHT-GRAY THEME ---
+# --- ULTIMATE COLORFUL MODERN THEME ---
 st.markdown("""
     <style>
-    /* Soft industrial background instead of blinding white */
+    /* Vibrant colorful page background gradient */
     .stApp {
-        background-color: #F4F6F9;
-        color: #1A1A1A;
+        background: linear-gradient(135deg, #f0f4ff 0%, #fef2f2 50%, #f0fdf4 100%);
+        color: #0f172a;
     }
-    /* Clean white cards for content containers */
-    div.stMarkdown, div.stDataFrame, div.element-container {
-        background-color: transparent;
-    }
-    /* Sidebar styling */
+    
+    /* Sleek Deep Blue-Purple Sidebar */
     section[data-testid="stSidebar"] {
-        background-color: #EAECEF;
-        border-right: 1px solid #D1D5DB;
-    }
-    /* Deep Maroon/Red Primary Buttons */
-    .stButton>button {
-        background-color: #990000; 
+        background: linear-gradient(180deg, #1e1b4b 0%, #312e81 100%);
         color: white;
-        border-radius: 4px;
+    }
+    section[data-testid="stSidebar"] .stMarkdown, section[data-testid="stSidebar"] label, section[data-testid="stSidebar"] .stSelectbox span {
+        color: #e0e7ff !important;
+    }
+
+    /* Vibrant Gradient Buttons (Blue to Purple) */
+    .stButton>button {
+        background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+        color: white;
+        border-radius: 10px;
         font-weight: bold;
         border: none;
+        box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+        transition: 0.3s ease;
     }
     .stButton>button:hover {
-        background-color: #CC0000;
-        color: white;
+        background: linear-gradient(135deg, #2563eb 100%, #7c3aed 100%);
+        box-shadow: 0 6px 15px rgba(139, 92, 246, 0.5);
     }
-    /* Form submit button */
+
+    /* Vibrant Form Submit Button */
     .stFormSubmitButton>button {
-        background-color: #990000;
+        background: linear-gradient(135deg, #10b981 0%, #06b6d4 100%);
         color: white;
         font-weight: bold;
-        border-radius: 4px;
+        border-radius: 10px;
         width: 100%;
+        border: none;
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
     }
     .stFormSubmitButton>button:hover {
-        background-color: #CC0000;
-        color: white;
+        background: linear-gradient(135deg, #059669 0%, #0891b2 100%);
+    }
+
+    /* Gorgeous Pop-out White Cards for KPIs & Dataframes */
+    div[data-testid="stMetric"], div.stDataFrame, div.stTabs {
+        background-color: #ffffff;
+        padding: 18px;
+        border-radius: 14px;
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+        border: 1px solid #e2e8f0;
+    }
+    
+    /* Metric Accent Left Border */
+    div[data-testid="stMetric"] {
+        border-left: 6px solid #8b5cf6;
     }
     </style>
 """, unsafe_allow_html=True)
