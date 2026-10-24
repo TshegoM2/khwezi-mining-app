@@ -1,5 +1,6 @@
 import streamlit as st
 import pandas as pd
+import plotly.express as px
 
 # --- PHASE 1: APP FRAMEWORK & LAYOUT SETUP ---
 st.set_page_config(
@@ -317,7 +318,42 @@ else:
         st.subheader("⚙️ User Management Portal (Administrator Only)")
         st.text_input("New User ID")
         st.button("Grant Access")
-
+        
+# --- LUNGI'S SECTION: DATA ANALYTICS (Appendix A) ---
+    elif selected_page == "Interactive Data Analysis":
+        st.subheader("📈 Interactive Data Analysis & Business Intelligence")
+        st.write("Answering key mining engineering questions from Appendix A.")
+       
+        tab1, tab2 = st.tabs(["Health & Safety Analytics", "Equipment Analytics"])
+       
+        with tab1:
+            st.write("### 1. Which department has the highest number of incidents?")
+            dept_counts = safety_incidents["Section"].value_counts().reset_index()
+            dept_counts.columns = ["Department", "Incident Count"]
+            fig_dept = px.bar(dept_counts, x="Department", y="Incident Count", color="Department", title="Safety Incidents by Department")
+            st.plotly_chart(fig_dept, use_container_width=True)
+           
+            st.write("### 2. How many incidents are classified as high or critical?")
+            sev_counts = safety_incidents["Severity"].value_counts().reset_index()
+            sev_counts.columns = ["Severity", "Count"]
+            fig_sev = px.pie(sev_counts, names="Severity", values="Count", title="Incident Severity Breakdown", color="Severity",
+                             color_discrete_map={"Critical":"red", "High":"orange", "Medium":"yellow", "Low":"green"})
+            st.plotly_chart(fig_sev, use_container_width=True)
+           
+        with tab2:
+            st.write("### 3. What is the average equipment availability?")
+            fig_avail = px.bar(equipment, x="Equipment_ID", y="Availability_Percent", color="Equipment_Type",
+                               title="Equipment Availability (%)", text="Availability_Percent")
+            fig_avail.update_traces(texttemplate='%{text:.2f}%', textposition='outside')
+            fig_avail.add_hline(y=90, line_dash="dash", line_color="red", annotation_text="90% Target")
+            st.plotly_chart(fig_avail, use_container_width=True)
+           
+            st.write("### 4. Which equipment has the highest operating temperature?")
+            fig_temp = px.bar(equipment, x="Equipment_ID", y="Temperature_C", color="Overall_Condition",
+                              title="Operating Temperatures (°C) vs Thresholds",
+                              color_discrete_map={"CRITICAL":"red", "WARNING":"orange", "NORMAL":"green"})
+            fig_temp.add_hline(y=100, line_dash="dash", line_color="red", annotation_text="Critical Limit (100°C)")
+            st.plotly_chart(fig_temp, use_container_width=True)
 
             
        
