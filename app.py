@@ -9,20 +9,24 @@ st.set_page_config(
     layout="wide"
 )
 
-# --- CUSTOM RED & WHITE THEME (Wits SME Branding) ---
+# --- CUSTOM RED & INDUSTRIAL LIGHT-GRAY THEME ---
 st.markdown("""
     <style>
-    /* Main background to clean white */
+    /* Soft industrial background instead of blinding white */
     .stApp {
-        background-color: #FFFFFF;
-        color: #111111;
+        background-color: #F4F6F9;
+        color: #1A1A1A;
+    }
+    /* Clean white cards for content containers */
+    div.stMarkdown, div.stDataFrame, div.element-container {
+        background-color: transparent;
     }
     /* Sidebar styling */
     section[data-testid="stSidebar"] {
-        background-color: #F8F9FA;
-        border-right: 1px solid #E5E7EB;
+        background-color: #EAECEF;
+        border-right: 1px solid #D1D5DB;
     }
-    /* Red/Maroon Primary Buttons */
+    /* Deep Maroon/Red Primary Buttons */
     .stButton>button {
         background-color: #990000; 
         color: white;
@@ -48,7 +52,6 @@ st.markdown("""
     }
     </style>
 """, unsafe_allow_html=True)
-
 # --- SME LOGO & HEADER BRANDING ---
 # Tip: Save your red-and-white SME logo image in your GitHub repo as 'sme_logo.png'
 # If the image file isn't uploaded yet, Streamlit will gracefully skip it without crashing.
