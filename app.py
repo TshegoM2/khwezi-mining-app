@@ -114,6 +114,47 @@ else:
     # --- CENTRAL DASHBOARD ---
     if selected_page == "View Dashboard":
         st.subheader("📊 Central Monitoring Dashboard")
+        col1, col2 = st.columns(2)
+
+        with col1:
+            st.write("Safety Incidents by Severity")
+
+            severity_counts = (
+                safety_incidents["Severity"]
+                .value_counts()
+                .reset_index()
+            )
+            severity_counts.columns = ["Severity", "Count"]
+
+            fig1 = px.bar(
+                severity_counts,
+                x="Severity",
+                y="Count",
+                color="Severity",
+                title="Safety Incidents by Severity"
+            )
+
+            st.plotly_chart(fig1, use_container_width=True)
+
+        with col2:
+            st.write("Worker PPE Compliance")
+
+            ppe_counts = (
+                worker_safety["PPE_Status"]
+                .value_counts()
+                .reset_index()
+            )
+            ppe_counts.columns = ["PPE_Status", "Count"]
+
+            fig2 = px.pie(
+                ppe_counts,
+                names="PPE_Status",
+                values="Count",
+                title="Worker PPE Compliance"
+            )
+
+            st.plotly_chart(fig2, use_container_width=True)
+
         k1, k2, k3, k4 = st.columns(4)
         k1.metric("Total Workers", "142", "Active")
         k2.metric("Safety Incidents", "3", "-1 today", delta_color="inverse")
