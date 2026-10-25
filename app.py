@@ -184,11 +184,12 @@ else:
     # --- CENTRAL DASHBOARD ---
     if selected_page == "View Dashboard":
         st.subheader("📊 Central Monitoring Dashboard")
-        k1, k2, k3, k4 = st.columns(4)
+        k1, k2, k3, k4, k5 = st.columns(5)
         k1.metric("Total Workers", "142", "Active")
         k2.metric("Safety Incidents", "3", "-1 today", delta_color="inverse")
         k3.metric("Equipment Availability", f"{equipment['Availability_Percent'].mean():.1f}%")
         k4.metric("Critical Alerts", (equipment["Overall_Condition"] == "CRITICAL").sum(), "Action Required", delta_color="inverse")
+        k5.metric("Near Misses", near_miss_count, "Monitored")
         st.info("💡 Use the sidebar navigation menu to access specific system modules.")
         
         st.subheader("🚜 Equipment Monitoring Analysis")
