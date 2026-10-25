@@ -184,9 +184,7 @@ else:
     # --- CENTRAL DASHBOARD ---
     if selected_page == "View Dashboard":
         st.subheader("📊 Central Monitoring Dashboard")
-      if selected_page == "View Dashboard":
-        st.subheader("📊 Central Monitoring Dashboard")
-        
+      
         # Safe 4-column metric layout that will never crash
         k1, k2, k3, k4 = st.columns(4)
         k1.metric("Total Workers", len(worker_safety), "Active")
